@@ -20,6 +20,10 @@ namespace WebUI.Controllers
         // GET: Product
         public ActionResult List()
         {
+            int count = 0;
+            List<Product> list = repository.Products.ToList();
+            if (list != null)
+                count = list.Count;
             return View(repository.Products);
         }
     }
