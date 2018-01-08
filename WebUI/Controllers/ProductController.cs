@@ -11,6 +11,7 @@ namespace WebUI.Controllers
     public class ProductController : Controller
     {
         private IProductsRepository repository;
+        public int PageSize = 4;
 
         public ProductController(IProductsRepository productRepository)
         {
@@ -18,13 +19,12 @@ namespace WebUI.Controllers
         }
 
         // GET: Product
-        public ActionResult List()
+        public ViewResult List(int page = 1)
         {
-            int count = 0;
-            List<Product> list = repository.Products.ToList();
-            if (list != null)
-                count = list.Count;
-            return View(repository.Products);
+            return View(repository.Products
+                        .OrderBy(p => p.ProductID)
+                        .Skip((page - 1) * PageSize)
+                        .Take(PageSize));
         }
     }
 }

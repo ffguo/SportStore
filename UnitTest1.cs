@@ -13,7 +13,7 @@ namespace UnitTests
     public class UnitTest1
     {
         [TestMethod]
-        public void TestMethod1()
+        public void Can_Paginate()
         {
             //准备
             Mock<IProductsRepository> mock = new Mock<IProductsRepository>();
