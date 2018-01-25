@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -33,6 +34,13 @@ namespace WebUI.Infrastructure
             //    });
             //kernel.Bind<IProductsRepository>().ToConstant(mock.Object);
             kernel.Bind<IProductsRepository>().To<EFProductRepository>();
+
+            EmailSettings emailSetting = new EmailSettings
+            {
+                WriteAsFile = bool.Parse(ConfigurationManager.AppSettings["Email.WriteAsFile"] ?? "false")
+            };
+
+            kernel.Bind<IOrderProcessor>().To<EmailOrderProcessor>().WithConstructorArgument("settings", emailSetting);
         }
 
         public object GetService(Type serviceType)

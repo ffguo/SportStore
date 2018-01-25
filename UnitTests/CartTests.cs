@@ -116,7 +116,7 @@ namespace UnitTests
             Cart cart = new Cart();
 
             // 准备-创建控制器
-            CartController target = new CartController(mock.Object);
+            CartController target = new CartController(mock.Object, null);
 
             // 动作-对cart添加一个产品
             target.AddToCart(cart, 1, null);
@@ -140,7 +140,7 @@ namespace UnitTests
             Cart cart = new Cart();
 
             // 准备-创建控制器
-            CartController target = new CartController(mock.Object);
+            CartController target = new CartController(mock.Object, null);
 
             // 动作-向cart添加一个产品
             RedirectToRouteResult result = target.AddToCart(cart, 2, "myUrl");
@@ -157,7 +157,7 @@ namespace UnitTests
             Cart cart = new Cart();
 
             // 准备-创建控制器
-            CartController target = new CartController(null);
+            CartController target = new CartController(null, null);
 
             // 动作-向cart添加一个产品
             CartIndexViewModel result = (CartIndexViewModel)target.Index(cart, "myUrl").ViewData.Model;
@@ -165,6 +165,84 @@ namespace UnitTests
             // 断言
             Assert.AreEqual(result.Cart, cart);
             Assert.AreEqual(result.ReturnUrl, "myUrl");
+        }
+
+        [TestMethod]
+        public void Cannot_Checkout_Empty()
+        {
+            // 准备-创建一个模仿的订单处理器
+            Mock<IOrderProcessor> mock = new Mock<IOrderProcessor>();
+
+            // 准备-创建新购物车
+            Cart cart = new Cart();
+
+            // 准备-创建一个控制器实例
+            ShippingDetails shippingDetails = new ShippingDetails();
+
+            // 准备-创建控制器
+            CartController target = new CartController(null, mock.Object);
+
+            // 动作
+            ViewResult result = target.Checkout(cart, shippingDetails);
+
+            // 断言-检查，订单尚未传递给处理器
+            mock.Verify(m => m.ProcessOrder(It.IsAny<Cart>(), It.IsAny<ShippingDetails>()), Times.Never());
+            Assert.AreEqual("", result.ViewName);
+            Assert.AreEqual(false, result.ViewData.ModelState.IsValid);
+        }
+
+        [TestMethod]
+        public void Cannot_Checkout_Invalid_ShippingDetails()
+        {
+            // 准备-创建一个模仿的订单处理器
+            Mock<IOrderProcessor> mock = new Mock<IOrderProcessor>();
+
+            // 准备-创建新购物车
+            Cart cart = new Cart();
+            cart.AddItem(new Product(), 1);
+
+            // 准备-创建一个控制器实例
+            ShippingDetails shippingDetails = new ShippingDetails();
+
+            // 准备-创建控制器
+            CartController target = new CartController(null, mock.Object);
+
+            target.ModelState.AddModelError("error", "error");
+
+            // 动作
+            ViewResult result = target.Checkout(cart, shippingDetails);
+
+            // 断言-检查，订单尚未传递给处理器
+            mock.Verify(m => m.ProcessOrder(It.IsAny<Cart>(), It.IsAny<ShippingDetails>()), Times.Never());
+            Assert.AreEqual("", result.ViewName);
+            Assert.AreEqual(false, result.ViewData.ModelState.IsValid);
+        }
+
+        [TestMethod]
+        public void Cannot_Checkout_And_Submit_Order()
+        {
+            // 准备-创建一个模仿的订单处理器
+            Mock<IOrderProcessor> mock = new Mock<IOrderProcessor>();
+
+            // 准备-创建新购物车
+            Cart cart = new Cart();
+            cart.AddItem(new Product(), 1);
+
+            // 准备-创建一个控制器实例
+            ShippingDetails shippingDetails = new ShippingDetails();
+
+            // 准备-创建控制器
+            CartController target = new CartController(null, mock.Object);
+
+            target.ModelState.AddModelError("error", "error");
+
+            // 动作
+            ViewResult result = target.Checkout(cart, shippingDetails);
+
+            // 断言-检查，订单尚未传递给处理器
+            mock.Verify(m => m.ProcessOrder(It.IsAny<Cart>(), It.IsAny<ShippingDetails>()), Times.Once());
+            Assert.AreEqual("Completed", result.ViewName);
+            Assert.AreEqual(true, result.ViewData.ModelState.IsValid);
         }
     }
 }

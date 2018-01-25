@@ -24,7 +24,7 @@ namespace WebUI.Infrastructure.Binders
                 cart = new Cart();
                 if (controllerContext.HttpContext.Session != null)
                 {
-                    cart = (Cart)controllerContext.HttpContext.Session[sessionKey];
+                    controllerContext.HttpContext.Session[sessionKey] = cart;
                 }
             }
 
