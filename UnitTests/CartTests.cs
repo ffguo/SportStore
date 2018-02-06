@@ -228,16 +228,11 @@ namespace UnitTests
             Cart cart = new Cart();
             cart.AddItem(new Product(), 1);
 
-            // 准备-创建一个控制器实例
-            ShippingDetails shippingDetails = new ShippingDetails();
-
             // 准备-创建控制器
             CartController target = new CartController(null, mock.Object);
 
-            target.ModelState.AddModelError("error", "error");
-
             // 动作
-            ViewResult result = target.Checkout(cart, shippingDetails);
+            ViewResult result = target.Checkout(cart, new ShippingDetails());
 
             // 断言-检查，订单尚未传递给处理器
             mock.Verify(m => m.ProcessOrder(It.IsAny<Cart>(), It.IsAny<ShippingDetails>()), Times.Once());
