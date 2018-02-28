@@ -122,5 +122,28 @@ namespace UnitTests
             mock.Verify(m => m.SaveProduct(It.IsAny<Product>()), Times.Never());
             Assert.IsNotInstanceOfType(result, typeof(RedirectResult));
         }
+
+        [TestMethod]
+        public void Can_Delete_Valid_Products()
+        {
+            // 准备-创建一个产品
+            Product prod = new Product { ProductID = 2, Name = "Test" };
+
+            // 准备-创建模仿存储库
+            Mock<IProductsRepository> mock = new Mock<IProductsRepository>();
+            mock.Setup(m => m.Products).Returns(new Product[]
+            {
+                new Product { ProductID = 1, Name = "P1" }
+            });
+
+            // 准备-创建控制器
+            AdminController target = new AdminController(mock.Object);
+
+            // 动作
+            target.Delete(prod.ProductID);
+
+            // 断言
+            mock.Verify(m => m.DeleteProduct(prod.ProductID));
+        }
     }
 }
