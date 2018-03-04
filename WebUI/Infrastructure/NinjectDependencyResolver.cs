@@ -9,6 +9,8 @@ using Moq;
 using Domain.Abstract;
 using Domain.Entities;
 using Domain.Concrete;
+using WebUI.Infrastructure.Abstract;
+using WebUI.Infrastructure.Concrete;
 
 namespace WebUI.Infrastructure
 {
@@ -41,6 +43,7 @@ namespace WebUI.Infrastructure
             };
 
             kernel.Bind<IOrderProcessor>().To<EmailOrderProcessor>().WithConstructorArgument("settings", emailSetting);
+            kernel.Bind<IAuthProvider>().To<FormsAuthProvider>();
         }
 
         public object GetService(Type serviceType)

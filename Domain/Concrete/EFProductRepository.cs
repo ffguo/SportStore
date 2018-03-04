@@ -46,6 +46,8 @@ namespace Domain.Concrete
                     dbEntry.Description = product.Description;
                     dbEntry.Price = product.Price;
                     dbEntry.Category = product.Category;
+                    dbEntry.ImageMineType = product.ImageMineType;
+                    dbEntry.ImageData = product.ImageData;
                 }
             }
             context.SaveChanges();

@@ -7,6 +7,8 @@ using WebUI.Controllers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
+using WebUI.Infrastructure.Abstract;
+using WebUI.Models;
 
 namespace UnitTests
 {
@@ -144,6 +146,56 @@ namespace UnitTests
 
             // 断言
             mock.Verify(m => m.DeleteProduct(prod.ProductID));
+        }
+
+        [TestMethod]
+        public void Can_Login_With_Valid_Credentials()
+        {
+            // 准备-创建模仿存储库
+            Mock<IAuthProvider> mock = new Mock<IAuthProvider>();
+            mock.Setup(m => m.Authenticate("admin", "secret")).Returns(true);
+
+            // 准备-创建视图模型
+            LoginViewModel model = new LoginViewModel
+            {
+                UserName = "admin",
+                Password = "secret"
+            };
+
+            // 准备-创建控制器
+            AccountController target = new AccountController(mock.Object);
+
+            // 动作
+            ActionResult result = target.Login(model, "/MyURL");
+
+            // 断言
+            Assert.IsInstanceOfType(result, typeof(RedirectResult));
+            Assert.AreEqual("/MyURL", ((RedirectResult)result).Url);
+        }
+
+        [TestMethod]
+        public void Cannot_Login_With_Invalid_Credentials()
+        {
+            // 准备-创建模仿存储库
+            Mock<IAuthProvider> mock = new Mock<IAuthProvider>();
+            mock.Setup(m => m.Authenticate("badUser", "badPass")).Returns(false);
+
+            // 准备-创建视图模型
+            LoginViewModel model = new LoginViewModel
+            {
+                UserName = "badUser",
+                Password = "badPass"
+            };
+
+            // 准备-创建控制器
+            AccountController target = new AccountController(mock.Object);
+
+            // 动作
+            ActionResult result = target.Login(model, "/MyURL");
+
+            // 断言
+            Assert.IsInstanceOfType(result, typeof(ViewResult));
+            Assert.IsFalse(((ViewResult)result).ViewData.ModelState.IsValid);
         }
     }
 }
